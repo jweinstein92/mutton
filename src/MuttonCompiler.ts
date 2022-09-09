@@ -9,6 +9,7 @@ const TEMPLATE_START_CHAR = '{';
 const TEMPLATE_END_CHAR = '}';
 const SINGLE_QUOTE_CHAR = "'";
 const DOUBLE_QUOTE_CHAR = '"';
+const ESCAPE_CHAR = '\\';
 
 /**
  * The length of the start/end pattern of a template variable: `{{`
@@ -36,6 +37,7 @@ abstract class MuttonCompilerState {
 class MuttonCompilerWithinVariableState extends MuttonCompilerState {
   onChar(char: string) {
     const nextChar = this.compiler.lookAhead(1);
+    const prevChar = this.compiler.lookBehind(1);
 
     // Search for the `}}` pattern, so we know when we've reached the end of
     // the template variable.
@@ -43,9 +45,9 @@ class MuttonCompilerWithinVariableState extends MuttonCompilerState {
       this.compiler.skip(1);
       this.compiler.addExpressionNode();
       this.compiler.changeToDefaultState();
-    } else if (char === SINGLE_QUOTE_CHAR) {
+    } else if (char === SINGLE_QUOTE_CHAR && prevChar !== ESCAPE_CHAR) {
       this.compiler.changeToWithinSingleQuoteState();
-    } else if (char === DOUBLE_QUOTE_CHAR) {
+    } else if (char === DOUBLE_QUOTE_CHAR && prevChar !== ESCAPE_CHAR) {
       this.compiler.changeToWithinDoubleQuoteState();
     }
   }
@@ -261,6 +263,10 @@ export default class MuttonCompiler {
 
   lookAhead(count: number): string {
     return this.template[this.position + count];
+  }
+
+  lookBehind(count: number): string {
+    return this.template[this.position - count];
   }
 
   getPosition() {

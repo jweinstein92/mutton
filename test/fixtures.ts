@@ -67,6 +67,21 @@ export const fixtures: EvaluatorTestFixture[] = [
     },
   },
   {
+    desc: 'should render template with escaped quote in variable',
+    template: '{{hopper\\"}}',
+    expressionCalls: ['hopper\\"'],
+    renderResult: 'hopper\\"',
+    compiled: {
+      nodes: [
+        getExpressioNode({
+          expression: 'hopper\\"',
+          start: 0,
+          end: 11,
+        }),
+      ],
+    },
+  },
+  {
     desc: 'should allow multiple template variables in template',
     template: '{{hopper}} {{mochi}}',
     expressionCalls: ['hopper', 'mochi'],
